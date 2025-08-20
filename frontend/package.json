@@ -53,5 +53,10 @@
     "@types/react-syntax-highlighter": "^15.5.11",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32"
-  }
+  },
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
+  },
+  "proxy": "http://localhost:8000"
 }

@@ -65,7 +65,7 @@ class CricketQueryGenerator:
         - shot_type (TEXT): Type of shot played
         - shot_control (INTEGER): Shot control rating
         - bat_hand (TEXT): Batting hand (LHB/RHB)
-        - bowling_style (TEXT): Bowling style (pace/spin/etc)
+        - bowling_type (TEXT): Bowling type (pace/spin)
         - predicted_score (TEXT): Predicted match score
         - win_probability (TEXT): Win probability
         - team_runs (INTEGER): Team total runs
@@ -106,8 +106,12 @@ class CricketQueryGenerator:
         - Middle overs: overs 7-15 (over_col BETWEEN 7 AND 15)
         - LHB = Left Hand Batsman (bat_hand = 'LHB')
         - RHB = Right Hand Batsman (bat_hand = 'RHB')
-        - Pace bowlers: bowling_style like '%pace%' or bowling_style like '%fast%'
-        - Spin bowlers: bowling_style like '%spin%'
+        - Pace bowlers: bowling_type ILIKE '%pace%' or bowling_type ILIKE '%fast%' or bowling_type ILIKE '%medium%'
+        - Spin bowlers: bowling_type ILIKE '%spin%'
+        - Batting Average: SUM(runs_batter) / NULLIF(COUNT(CASE WHEN is_wicket = true THEN 1 END), 0)
+        - Bowling Average: SUM(runs_total) / NULLIF(COUNT(CASE WHEN is_wicket = true THEN 1 END), 0)
+        - Strike Rate: (SUM(runs_batter) * 100.0 / COUNT(CASE WHEN valid_ball = 1 THEN 1 END))
+        - Economy Rate: (SUM(runs_total) * 6.0 / COUNT(CASE WHEN valid_ball = 1 THEN 1 END))
         """
     
     def extract_minimum_threshold(self, user_query: str) -> Optional[int]:

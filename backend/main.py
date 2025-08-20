@@ -24,12 +24,18 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+# CORS middleware - Updated for production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=[
+        "http://localhost:3000",  # Local development
+        "https://ipl-cricket-frontend.herokuapp.com",  # Heroku frontend
+        "https://*.herokuapp.com",  # All Heroku apps
+        "https://*.vercel.app",     # Vercel deployment
+        "https://*.netlify.app",    # Netlify deployment
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
