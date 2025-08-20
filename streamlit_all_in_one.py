@@ -384,7 +384,7 @@ if 'query_generator' not in st.session_state:
     st.session_state.query_generator = None
 
 # Initialize connections
-@st.cache_resource
+@st.cache_resource(show_spinner="🔄 Connecting to database and initializing AI...")
 def initialize_connections():
     # Debug: Show available secrets (without values)
     if hasattr(st, 'secrets'):
@@ -441,7 +441,6 @@ def initialize_connections():
         st.stop()
 
 # Get database stats
-@st.cache_data(ttl=300)  # Cache for 5 minutes
 def get_stats_summary(db_manager):
     try:
         query = """
@@ -468,8 +467,11 @@ def main():
     st.markdown("### Ask me anything about IPL cricket stats! Powered by AI & 277K+ records")
     
     # Initialize connections
-    with st.spinner("🔄 Connecting to database and initializing AI..."):
+    try:
         db_manager, player_matcher, query_generator, total_players = initialize_connections()
+    except Exception as e:
+        st.error(f"Failed to initialize application: {e}")
+        st.stop()
     
     # Sidebar
     with st.sidebar:
