@@ -386,12 +386,37 @@ if 'query_generator' not in st.session_state:
 # Initialize connections
 @st.cache_resource
 def initialize_connections():
-    database_url = st.secrets.get("DATABASE_URL", os.getenv("DATABASE_URL"))
-    groq_api_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
+    # Debug: Show available secrets (without values)
+    if hasattr(st, 'secrets'):
+        available_secrets = list(st.secrets.keys()) if st.secrets else []
+        st.sidebar.write(f"🔑 Available secrets: {available_secrets}")
     
-    if not database_url or not groq_api_key:
-        st.error("Please set DATABASE_URL and GROQ_API_KEY in Streamlit secrets or environment variables")
-        st.stop()
+    try:
+        database_url = st.secrets["DATABASE_URL"]
+        groq_api_key = st.secrets["GROQ_API_KEY"]
+        st.sidebar.success("✅ Secrets loaded from Streamlit")
+    except (KeyError, AttributeError) as e:
+        # Fallback to environment variables
+        database_url = os.getenv("DATABASE_URL")
+        groq_api_key = os.getenv("GROQ_API_KEY")
+        st.sidebar.warning("⚠️ Using environment variables")
+        
+        if not database_url or not groq_api_key:
+            st.error(f"""
+            🔑 **Missing Configuration**
+            
+            Please add these secrets in Streamlit Cloud:
+            1. Go to your app settings
+            2. Click on "Secrets" 
+            3. Add:
+            ```
+            DATABASE_URL = "your_database_url"
+            GROQ_API_KEY = "your_groq_key"
+            ```
+            
+            Error: {e}
+            """)
+            st.stop()
     
     try:
         # Initialize database
