@@ -143,16 +143,30 @@ class SimpleCricketAgent:
 
 Database Schema:
 - Table: ipl_data
-- Key columns: batter_full_name, bowler_full_name, runs_batter, runs_total, over_col, ball, is_four, is_six, is_wicket, valid_ball, bat_hand, bowling_style, season, venue, batting_team, bowling_team, innings, match_id, date
+- Key columns: batter_full_name, bowler_full_name, runs_batter, runs_total, over_col, ball, is_four, is_six, is_wicket, valid_ball, bat_hand, bowling_type, season, venue, batting_team, bowling_team, innings, match_id, date
 
-Important:
-- For runs analysis, use SUM(runs_batter) for batter runs
-- For strike rate: (SUM(runs_batter) * 100.0 / COUNT(CASE WHEN valid_ball = 1 THEN 1 END))
-- For economy rate: (SUM(runs_total) * 6.0 / COUNT(CASE WHEN valid_ball = 1 THEN 1 END))
-- Use ILIKE '%name%' for player name searches
-- Add HAVING clauses for minimum thresholds (e.g., >= 500 runs)
+Important Cricket Statistics:
+- Batting Strike Rate: (SUM(runs_batter) * 100.0 / COUNT(CASE WHEN valid_ball = 1 THEN 1 END))
+- Batting Average: SUM(runs_batter) / NULLIF(COUNT(CASE WHEN is_wicket = true THEN 1 END), 0)
+- Bowling Average: SUM(runs_total) / NULLIF(COUNT(CASE WHEN is_wicket = true THEN 1 END), 0)
+- Bowling Strike Rate: COUNT(CASE WHEN valid_ball = 1 THEN 1 END) / NULLIF(COUNT(CASE WHEN is_wicket = true THEN 1 END), 0)
+- Bowling Economy Rate: (SUM(runs_total) * 6.0 / COUNT(CASE WHEN valid_ball = 1 THEN 1 END))
+
+Bowling Types:
+- Use bowling_type column (not bowling_style)
+- Spin bowling: bowling_type ILIKE '%spin%'
+- Pace bowling: bowling_type ILIKE '%pace%' OR bowling_type ILIKE '%fast%' OR bowling_type ILIKE '%medium%'
+
+Match Phases:
 - Powerplay: over_col BETWEEN 1 AND 6
+- Middle overs: over_col BETWEEN 7 AND 15
 - Death overs: over_col BETWEEN 16 AND 20
+
+Guidelines:
+- Use ILIKE '%name%' for player name searches
+- Add HAVING clauses for minimum thresholds (e.g., >= 500 runs or >= 100 balls)
+- Use NULLIF to avoid division by zero
+- Round decimal results to 2 places with ROUND()
 
 Generate ONLY the SQL query, no explanations."""
 
@@ -313,10 +327,10 @@ def main():
     col1, col2, col3, col4 = st.columns(4)
     
     examples = [
-        ("🏆 Top Scorers", "Who are the top 10 run scorers in IPL?"),
-        ("⚡ Death Overs", "Best batsmen in death overs"),
-        ("🎯 vs Spin", "Best batters against spin bowling"),
-        ("👑 Kohli Stats", "Virat Kohli career statistics")
+        ("🏆 Best Average", "Highest batting average vs spin bowling min 500 runs"),
+        ("⚡ Strike Rate", "Best strike rate against pace bowling min 1000 balls"),
+        ("🎯 Kohli vs Spin", "Virat Kohli average and strike rate vs spin"),
+        ("🏹 Bowling Stats", "Best bowling average and strike rate vs left handed batsmen")
     ]
     
     for i, (title, query) in enumerate(examples):
@@ -329,7 +343,7 @@ def main():
     # Query input
     query_input = st.text_input(
         "🤔 **Ask your cricket question:**",
-        placeholder="e.g., Which bowler has the best economy rate in powerplay overs?",
+        placeholder="e.g., Best batting average vs spin bowling min 500 runs",
         key="main_query_input"
     )
     
