@@ -294,7 +294,7 @@ def process_query(query: str, cricket_agent):
 def main():
     # Header
     st.markdown('<h1 class="main-header">🏏 IPL Cricket Chatbot</h1>', unsafe_allow_html=True)
-    st.markdown("### Ask me anything about IPL cricket stats! Powered by Advanced AI & 277K+ records")
+    st.markdown("### Ask me anything about IPL cricket stats! Powered by Advanced AI & 277K+ records (Updated)")
     
     # Initialize connections
     try:
