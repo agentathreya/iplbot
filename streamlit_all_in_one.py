@@ -279,18 +279,19 @@ class CricketQueryGenerator:
         
         User Question: "{user_query}"
         
-        Instructions:
-        1. Generate ONLY a valid PostgreSQL SELECT query
-        2. Use exact player names when available
-        3. For batting queries, group by batter_full_name
-        4. For bowling queries, group by bowler_full_name
-        5. For boolean columns use COUNT(CASE WHEN column = true THEN 1 END)
-        6. For strike rate: (SUM(runs_batter) * 100.0 / COUNT(CASE WHEN valid_ball = 1 THEN 1 END))
-        7. Apply minimum thresholds: HAVING SUM(runs_batter) >= 500 (or specified minimum)
-        8. Order by most relevant metric DESC
-        9. LIMIT to 10-20 results
+        CRITICAL INSTRUCTIONS:
+        1. Return ONLY a valid PostgreSQL SELECT query - NO explanations, comments, or additional text
+        2. Start with SELECT and end with semicolon
+        3. Use exact player names when available
+        4. For batting queries, group by batter_full_name
+        5. For bowling queries, group by bowler_full_name
+        6. For boolean columns use COUNT(CASE WHEN column = true THEN 1 END)
+        7. For strike rate: (SUM(runs_batter) * 100.0 / COUNT(CASE WHEN valid_ball = 1 THEN 1 END))
+        8. Apply minimum thresholds: HAVING SUM(runs_batter) >= 500 (or specified minimum)
+        9. Order by most relevant metric DESC
+        10. LIMIT to 10-20 results
         
-        Return ONLY the SQL query.
+        IMPORTANT: Return ONLY the SQL query with NO additional text, explanations, or comments.
         """
         
         try:
@@ -315,16 +316,44 @@ class CricketQueryGenerator:
             return self._fallback_query_generation(user_query, matched_players)
     
     def _clean_sql_query(self, query: str) -> str:
+        # Remove code block formatting
         query = re.sub(r'```sql\n?', '', query)
         query = re.sub(r'```\n?', '', query)
+        
+        # Remove extra whitespace
         query = ' '.join(query.split())
         
+        # Find the SELECT statement
         if not query.upper().startswith('SELECT'):
             select_match = re.search(r'SELECT\s', query, re.IGNORECASE)
             if select_match:
                 query = query[select_match.start():]
         
-        return query.strip()
+        # Remove any text after the SQL query ends
+        # Look for common SQL ending patterns and cut off explanatory text
+        sql_endings = [
+            r';\s*This\s+query',
+            r';\s*Note\s+that',
+            r';\s*The\s+query',
+            r';\s*This\s+will',
+            r';\s*Explanation',
+            r';\s*--',
+            r';\s*\n\n',
+            r';\s*[A-Z][a-z]+\s+[a-z]+',  # Sentences after semicolon
+        ]
+        
+        for pattern in sql_endings:
+            match = re.search(pattern, query, re.IGNORECASE)
+            if match:
+                query = query[:match.start() + 1]  # Keep the semicolon
+                break
+        
+        # Ensure query ends with semicolon if it doesn't
+        query = query.strip()
+        if not query.endswith(';'):
+            query += ';'
+        
+        return query
     
     def _fallback_query_generation(self, user_query: str, matched_players: List[str]) -> Dict[str, Any]:
         query_lower = user_query.lower()
