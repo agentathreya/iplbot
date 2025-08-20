@@ -29,9 +29,9 @@ Your code is already at: `https://github.com/agentathreya/iplchatbot`
 5. Advanced Settings → **Secrets**:
 
 ```toml
-DATABASE_URL = "postgresql://neondb_owner:npg_CfEz1gjOR0uh@ep-still-feather-a1rvh26h-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+DATABASE_URL = "postgresql://user:password@host:port/database?sslmode=require"
 
-GROQ_API_KEY = "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"
+GROQ_API_KEY = "gsk_your_groq_api_key_here"
 ```
 
 6. Click **"Deploy"**
