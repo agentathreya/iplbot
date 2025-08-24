@@ -1,1 +1,1 @@
-web: sh setup.sh && streamlit run streamlit_correct_cricket.py --server.port=$PORT --server.address=0.0.0.0
+web: mkdir -p /app/.streamlit && cp .streamlit/secrets.toml /app/.streamlit/secrets.toml && sh setup.sh && streamlit run streamlit_correct_cricket.py --server.port=$PORT --server.address=0.0.0.0
