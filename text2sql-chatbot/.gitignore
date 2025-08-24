@@ -84,4 +84,4 @@ dmypy.json
 Thumbs.db
 
 # Streamlit
-.streamlit/
+# .streamlit/ (allow for deployment of secrets.toml)
